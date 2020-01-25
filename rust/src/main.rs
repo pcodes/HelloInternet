@@ -4,28 +4,21 @@ Code modified from https://riptutorial.com/rust/example/4404/a-simple-tcp-client
 
 use std::thread;
 use std::env;
-use std::net::{TcpListener, TcpStream, Shutdown};
+use std::net::{TcpListener, TcpStream};
 use std::io::{Read, Write};
-use std::str::from_utf8;
+use std::str::{from_utf8};
 
 fn handle_client(mut stream: TcpStream) {
+    let response = "Goodbye in Rust!";
     let mut data = [0 as u8; 50];
-    while match stream.read(&mut data) {
-        Ok(size) => {
-            stream.write(&data[0..size]).unwrap();
-            true
-        },
-        Err(_) => {
-            println!("An error occured, terminating connection with {}", stream.peer_addr().unwrap());
-            stream.shutdown(Shutdown::Both).unwrap();
-            false
-        }
-    } {}
+    let size = stream.read(&mut data).unwrap();
+    println!("Received from client: {}", from_utf8(&data[0..size]).unwrap());
+    stream.write(response.as_bytes()).unwrap();
 }
 
 fn server() {
     let listener = TcpListener::bind("0.0.0.0:8080").unwrap();
-    println!("Server listening on port 80");
+    println!("Server listening on port 8080");
     for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
@@ -44,24 +37,25 @@ fn server() {
 }
 
 fn client(){
-    match TcpStream::connect("3.86.163.129:8080") {
+    match TcpStream::connect("localhost:8080") {
         Ok(mut stream) => {
-            println!("Successfully connected to server in port 3333");
+            println!("Sending \"Hello in Rust!\"");
 
-            let msg = b"Hello!";
+            let msg = b"Hello in Rust!";
 
             stream.write(msg).unwrap();
-            println!("Sent Hello, awaiting reply...");
 
-            let mut data = [0 as u8; 6]; // using 6 byte buffer
-            match stream.read_exact(&mut data) {
-                Ok(_) => {
-                    if &data == msg {
-                        println!("Reply is ok!");
-                    } else {
-                        let text = from_utf8(&data).unwrap();
-                        println!("Unexpected reply: {}", text);
-                    }
+            let mut data = [0 as u8; 50]; // using 50 byte buffer
+            match stream.read(&mut data) {
+                Ok(size) => {
+                    let text = from_utf8(&data[0..size]).unwrap();
+                    println!("Received: {}", text);
+                    //if &data == msg {
+                    //    println!("Reply is ok!");
+                    //} else {
+                    //    let text = from_utf8(&data).unwrap();
+                    //    println!("Unexpected reply: {}", text);
+                    //}
                 },
                 Err(e) => {
                     println!("Failed to receive data: {}", e);
