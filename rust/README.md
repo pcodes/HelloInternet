@@ -16,8 +16,14 @@ cargo build
 Due to how Rust organizes programs, we have a single program that can act either as a client _or_ server.
 To run both at the same time, use two separate terminal instances (or a terminal multiplexer like [Tmux](https://github.com/tmux/tmux)).
 
-__Client__: `cargo run -- --client --hostname <HOSTNAME> --port <PORT>`
-__Server__: `cargo run -- --server --port <PORT>`
+__Client__: 
+```
+cargo run -- --client --hostname <HOSTNAME> --port <PORT>
+```
+__Server__: 
+```
+cargo run -- --server --port <PORT>
+```
 
 ## Rust Socket Info
 ### Creating a Socket
